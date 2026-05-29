@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import {
   ArrowRight,
   BrainCircuit,
@@ -53,12 +53,20 @@ function InfoCard({ icon: Icon, title, copy, className = 'glass-card' }) {
   );
 }
 
+function BrandLogo() {
+  return (
+    <>
+      <img className="brand-logo" src="/logo.png" alt="Clickdine.in logo" />
+      <span>Clickdine.in</span>
+    </>
+  );
+}
+
 export function Navbar() {
   return (
     <header className="navbar" role="banner">
       <a className="brand" href="#top" aria-label="Clickdine.in home">
-        <span className="brand-mark" aria-hidden="true">C</span>
-        Clickdine.in
+        <BrandLogo />
       </a>
       <nav aria-label="Primary navigation">
         {navLinks.map(([label, id]) => (
@@ -153,7 +161,7 @@ export function Hero() {
         </p>
         <div className="hero-actions">
           <ButtonLink href="#contact">Book a Free Automation Audit <ArrowRight size={18} aria-hidden="true" /></ButtonLink>
-          <ButtonLink href="#use-cases" variant="secondary">See Use Cases <ChevronRight size={18} aria-hidden="true" /></ButtonLink>
+          <ButtonLink href="#use-cases" variant="secondary">Explore Use Cases <ChevronRight size={18} aria-hidden="true" /></ButtonLink>
         </div>
         <div className="hero-proof">
           <span><ShieldCheck size={16} aria-hidden="true" /> Built for corporate workflows</span>
@@ -360,8 +368,7 @@ export function Footer() {
     <footer className="footer">
       <div>
         <a className="brand" href="#top" aria-label="Clickdine.in home">
-          <span className="brand-mark" aria-hidden="true">C</span>
-          Clickdine.in
+          <BrandLogo />
         </a>
         <p>AI automation systems for modern companies</p>
       </div>

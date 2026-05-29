@@ -30,16 +30,15 @@ export const metrics = [
 export const trustSignals = [
   'Workflow audit',
   'AI employee buildout',
-  'Enterprise tool integration',
-  'Ongoing optimization'
+  'Enterprise tool integration'
 ];
 
 export const workflowNodes = [
-  ['Lead Capture', 'Inbound form synced', 'Live', MailCheck],
+  ['Lead Captured', 'Inbound form synced', 'Live', MailCheck],
   ['AI Agent', 'Intent scored and routed', 'Automated', Bot],
-  ['CRM Update', 'Fields enriched instantly', 'Synced', DatabaseZap],
-  ['Email Follow-up', 'Personalized reply sent', 'Live', MailCheck],
-  ['Report Generated', 'Saved 42 hrs/week', 'Complete', BarChart3]
+  ['CRM Updated', 'Fields enriched instantly', 'Automated', DatabaseZap],
+  ['Follow-up Sent', 'Personalized reply sent', 'Live', MailCheck],
+  ['Report Generated', 'Saved 42 hrs/week', 'Saved 42 hrs/week', BarChart3]
 ];
 
 export const problems = [
