@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Clickdine.in | Smart dining starts here</title>
+    <meta
+      name="description"
+      content="Clickdine.in helps restaurants and diners connect with seamless digital dining experiences."
+    />
+    <style>
+      :root {
+        color-scheme: light;
+        --bg: #fff8f1;
+        --text: #1f2937;
+        --accent: #ea580c;
+        --card: #ffffff;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        font-family: Inter, system-ui, -apple-system, sans-serif;
+        background: var(--bg);
+        color: var(--text);
+      }
+
+      main {
+        max-width: 960px;
+        margin: 0 auto;
+        padding: 4rem 1rem;
+      }
+
+      .hero {
+        text-align: center;
+        margin-bottom: 2.5rem;
+      }
+
+      h1 {
+        margin: 0;
+        font-size: clamp(2rem, 4vw, 3.2rem);
+      }
+
+      .subtitle {
+        margin: 1rem auto 0;
+        max-width: 42rem;
+        font-size: 1.1rem;
+        line-height: 1.6;
+      }
+
+      .cta {
+        display: inline-block;
+        margin-top: 1.6rem;
+        padding: 0.75rem 1.25rem;
+        background: var(--accent);
+        color: #fff;
+        text-decoration: none;
+        border-radius: 0.5rem;
+        font-weight: 600;
+      }
+
+      .features {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 1rem;
+      }
+
+      .feature {
+        background: var(--card);
+        border: 1px solid #fed7aa;
+        border-radius: 0.75rem;
+        padding: 1rem;
+      }
+
+      .feature h2 {
+        margin: 0 0 0.5rem;
+        font-size: 1.05rem;
+      }
+
+      .feature p {
+        margin: 0;
+        line-height: 1.5;
+      }
+
+      footer {
+        text-align: center;
+        margin-top: 2rem;
+        color: #6b7280;
+        font-size: 0.95rem;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <section class="hero">
+        <h1>Welcome to Clickdine.in</h1>
+        <p class="subtitle">
+          The modern landing space for effortless digital dining — discover restaurants,
+          browse menus, and plan better dining experiences in a few taps.
+        </p>
+        <a class="cta" href="mailto:hello@clickdine.in">Get in touch</a>
+      </section>
+
+      <section class="features" aria-label="Key features">
+        <article class="feature">
+          <h2>Discover restaurants</h2>
+          <p>Find places to eat with streamlined discovery designed for speed and clarity.</p>
+        </article>
+        <article class="feature">
+          <h2>Digital-first menus</h2>
+          <p>Explore menus online with rich details that help diners decide confidently.</p>
+        </article>
+        <article class="feature">
+          <h2>Built for growth</h2>
+          <p>Give restaurants a clean, modern web presence that scales with demand.</p>
+        </article>
+      </section>
+
+      <footer>© <span id="year"></span> Clickdine.in. All rights reserved.</footer>
+    </main>
+
+    <script>
+      document.getElementById("year").textContent = new Date().getFullYear();
+    </script>
+  </body>
+</html>
