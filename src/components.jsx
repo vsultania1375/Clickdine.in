@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import {
   ArrowRight,
+  AlertCircle,
   BrainCircuit,
   Check,
   ChevronRight,
@@ -323,12 +324,38 @@ export function CTASection() {
 }
 
 export function Contact() {
-  const [isSubmitted, setIsSubmitted] = useState(false);
+  const [formState, setFormState] = useState({ status: 'idle', message: '' });
 
-  function handleSubmit(event) {
+  async function handleSubmit(event) {
     event.preventDefault();
-    setIsSubmitted(true);
-    event.currentTarget.reset();
+    const form = event.currentTarget;
+    const formData = new FormData(form);
+
+    setFormState({ status: 'loading', message: 'Sending your request...' });
+
+    try {
+      const response = await fetch('https://api.web3forms.com/submit', {
+        method: 'POST',
+        body: formData
+      });
+      const result = await response.json();
+
+      if (result.success) {
+        setFormState({
+          status: 'success',
+          message: 'Thanks. Your automation audit request has been sent successfully. Our team will contact you shortly.'
+        });
+        form.reset();
+        return;
+      }
+
+      throw new Error(result.message || 'Web3Forms submission failed.');
+    } catch {
+      setFormState({
+        status: 'error',
+        message: 'Something went wrong. Please try again or email us directly at uditshekhawat01@clickdine.in.'
+      });
+    }
   }
 
   return (
@@ -344,20 +371,35 @@ export function Contact() {
           <Phone size={18} aria-hidden="true" />
           <span>For corporates ready to reduce manual workload and scale operations intelligently.</span>
         </div>
+        <a className="contact-email" href="mailto:uditshekhawat01@clickdine.in">
+          uditshekhawat01@clickdine.in
+        </a>
       </div>
-      <form className="contact-form" onSubmit={handleSubmit} aria-label="Request automation audit form">
+      <form
+        className="contact-form"
+        action="https://api.web3forms.com/submit"
+        method="POST"
+        onSubmit={handleSubmit}
+        aria-label="Request automation audit form"
+      >
+        <input type="hidden" name="access_key" value="a202926a-3021-4d61-a043-d97a70cfb559" />
+        <input type="hidden" name="subject" value="New Automation Audit Request from Clickdine.in" />
+        <input type="hidden" name="from_name" value="Clickdine.in Website" />
         <label htmlFor="name">Name<input id="name" type="text" name="name" placeholder="Your name" autoComplete="name" required /></label>
         <label htmlFor="company">Company name<input id="company" type="text" name="company" placeholder="Company Pvt. Ltd." autoComplete="organization" required /></label>
         <label htmlFor="email">Work email<input id="email" type="email" name="email" placeholder="name@company.com" autoComplete="email" required /></label>
-        <label htmlFor="phone">Phone number<input id="phone" type="tel" name="phone" placeholder="+91 98765 43210" autoComplete="tel" /></label>
-        <label className="full" htmlFor="automation">What do you want to automate?<textarea id="automation" name="automation" placeholder="Reports, follow-ups, CRM updates, customer support, invoices..." required /></label>
-        {isSubmitted ? (
-          <div className="form-success" role="status" aria-live="polite">
-            <Check size={18} aria-hidden="true" />
-            <span>Thanks. Your request is ready for review. Connect a backend or form provider to receive submissions.</span>
+        <label htmlFor="phone">Phone number<input id="phone" type="tel" name="phone" placeholder="+91 98765 43210" autoComplete="tel" required /></label>
+        <label className="full" htmlFor="message">What do you want to automate?<textarea id="message" name="message" placeholder="Reports, follow-ups, CRM updates, customer support, invoices..." required /></label>
+        {formState.message ? (
+          <div className={`form-status ${formState.status === 'error' ? 'form-error' : 'form-success'}`} role="status" aria-live="polite">
+            {formState.status === 'error' ? <AlertCircle size={18} aria-hidden="true" /> : <Check size={18} aria-hidden="true" />}
+            <span>{formState.message}</span>
           </div>
         ) : null}
-        <button type="submit">Request Automation Audit <ArrowRight size={18} aria-hidden="true" /></button>
+        <button type="submit" disabled={formState.status === 'loading'}>
+          {formState.status === 'loading' ? 'Sending Request...' : 'Request Automation Audit'}
+          <ArrowRight size={18} aria-hidden="true" />
+        </button>
       </form>
     </section>
   );
@@ -377,6 +419,7 @@ export function Footer() {
         <a href="#ai-employees">AI Employees</a>
         <a href="#use-cases">Use Cases</a>
         <a href="#contact">Contact</a>
+        <a href="mailto:uditshekhawat01@clickdine.in">uditshekhawat01@clickdine.in</a>
       </nav>
       <span>Copyright 2026 Clickdine.in. All rights reserved.</span>
     </footer>

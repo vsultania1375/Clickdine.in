@@ -973,6 +973,13 @@ h1 span {
   margin-top: 3px;
 }
 
+.contact-email {
+  display: inline-flex;
+  margin-top: 16px;
+  color: var(--blue);
+  font-weight: 760;
+}
+
 .contact-form {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -991,7 +998,7 @@ h1 span {
 
 .contact-form .full,
 .contact-form button,
-.form-success {
+.form-status {
   grid-column: 1 / -1;
 }
 
@@ -1048,19 +1055,35 @@ h1 span {
   box-shadow: 0 16px 40px rgba(37, 99, 235, 0.22);
 }
 
-.form-success {
+.contact-form button:disabled {
+  cursor: wait;
+  opacity: 0.72;
+  transform: none;
+}
+
+.form-status {
   display: flex;
   align-items: flex-start;
   gap: 10px;
   padding: 14px 15px;
+  line-height: 1.55;
+}
+
+.form-success {
   border: 1px solid rgba(16, 185, 129, 0.26);
   border-radius: 15px;
   color: #047857;
   background: rgba(16, 185, 129, 0.08);
-  line-height: 1.55;
 }
 
-.form-success svg {
+.form-error {
+  border: 1px solid rgba(220, 38, 38, 0.22);
+  border-radius: 15px;
+  color: #b91c1c;
+  background: rgba(254, 226, 226, 0.64);
+}
+
+.form-status svg {
   flex: 0 0 auto;
   margin-top: 3px;
 }
@@ -1283,7 +1306,7 @@ h1 span {
 
   .contact-form .full,
   .contact-form button,
-  .form-success {
+  .form-status {
     grid-column: auto;
   }
 
