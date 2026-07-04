@@ -9,6 +9,7 @@ import {
   HowItWorks,
   LegalPage,
   MetricStrip,
+  MunimLabPage,
   Navbar,
   ProblemSection,
   SolutionSection,
@@ -136,6 +137,7 @@ export default function App() {
   const path = normalizePathname(window.location.pathname);
   const isPrivacyPage = path === '/privacy';
   const isDeletionPage = path === '/data-deletion';
+  const isMunimLabPage = path === '/munim-lab';
 
   useEffect(() => {
     if (isPrivacyPage) {
@@ -148,8 +150,13 @@ export default function App() {
       return;
     }
 
+    if (isMunimLabPage) {
+      document.title = 'AI Munim Lab Console | Clickdine.in';
+      return;
+    }
+
     document.title = 'Clickdine.in | AI Automation Agency for Corporate Teams';
-  }, [isPrivacyPage, isDeletionPage]);
+  }, [isPrivacyPage, isDeletionPage, isMunimLabPage]);
 
   return (
     <>
@@ -158,6 +165,8 @@ export default function App() {
         <LegalPage title="Privacy Policy" sections={privacySections} />
       ) : isDeletionPage ? (
         <LegalPage title="Data Deletion Instructions" sections={deletionSections} />
+      ) : isMunimLabPage ? (
+        <MunimLabPage />
       ) : (
         <HomePage />
       )}

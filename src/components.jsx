@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import {
   ArrowRight,
   AlertCircle,
@@ -92,6 +92,319 @@ export function LegalPage({ title, sections }) {
           </section>
         ))}
       </article>
+    </main>
+  );
+}
+
+const defaultLabConfig = {
+  backendUrl: 'https://wa.clickdine.in',
+  tenantId: 'demo-business',
+  sender: '919813423175',
+  message: 'Gupta ji ko 20 cement bag ka bill banao'
+};
+
+const labTokenStorageKey = 'clickdine_munim_lab_token';
+
+function normalizeBackendUrl(url) {
+  return url.replace(/\/+$/, '');
+}
+
+function FieldValue({ label, value }) {
+  if (value === undefined || value === null || value === '') {
+    return null;
+  }
+
+  const isObject = typeof value === 'object';
+
+  return (
+    <div className="munim-lab-result-row">
+      <dt>{label}</dt>
+      <dd>{isObject ? <pre>{JSON.stringify(value, null, 2)}</pre> : String(value)}</dd>
+    </div>
+  );
+}
+
+function ResponsePanel({ result }) {
+  if (!result) {
+    return (
+      <div className="munim-lab-empty">
+        Send a text or voice message to see AI Munim’s response here.
+      </div>
+    );
+  }
+
+  return (
+    <div className="munim-lab-response">
+      <dl>
+        <FieldValue label="Status" value={result.status || result.http_status} />
+        <FieldValue label="Transcript" value={result.transcript} />
+        <FieldValue label="Workflow" value={result.workflow} />
+        <FieldValue label="Task ID" value={result.task_id} />
+        <FieldValue label="State" value={result.state} />
+        <FieldValue label="Reply" value={result.reply || result.message} />
+        <FieldValue label="Confirmation Card" value={result.confirmation_card} />
+        <FieldValue label="Resolved Data" value={result.resolved || result.resolved_data || result.data} />
+        <FieldValue label="Warnings" value={result.warnings} />
+      </dl>
+      <details>
+        <summary>Raw JSON</summary>
+        <pre>{JSON.stringify(result, null, 2)}</pre>
+      </details>
+    </div>
+  );
+}
+
+export function MunimLabPage() {
+  const [backendUrl, setBackendUrl] = useState(defaultLabConfig.backendUrl);
+  const [token, setToken] = useState(() => localStorage.getItem(labTokenStorageKey) || '');
+  const [tenantId, setTenantId] = useState(defaultLabConfig.tenantId);
+  const [sender, setSender] = useState(defaultLabConfig.sender);
+  const [message, setMessage] = useState(defaultLabConfig.message);
+  const [status, setStatus] = useState('idle');
+  const [error, setError] = useState('');
+  const [result, setResult] = useState(null);
+  const [audioBlob, setAudioBlob] = useState(null);
+  const [audioUrl, setAudioUrl] = useState('');
+  const [recordingStatus, setRecordingStatus] = useState('Idle');
+  const [isRecording, setIsRecording] = useState(false);
+  const mediaRecorderRef = useRef(null);
+  const chunksRef = useRef([]);
+
+  const mediaSupported = typeof window !== 'undefined' && Boolean(navigator.mediaDevices?.getUserMedia && window.MediaRecorder);
+  const isLoading = status === 'loading';
+  const activeTaskId = result?.task_id;
+
+  function handleTokenChange(value) {
+    setToken(value);
+    if (value) {
+      localStorage.setItem(labTokenStorageKey, value);
+    } else {
+      localStorage.removeItem(labTokenStorageKey);
+    }
+  }
+
+  function ensureToken() {
+    if (!token.trim()) {
+      setError('Enter the AI Munim test token before sending a request.');
+      return false;
+    }
+    return true;
+  }
+
+  async function postJson(payload) {
+    if (!ensureToken()) return;
+
+    setStatus('loading');
+    setError('');
+
+    try {
+      const response = await fetch(`${normalizeBackendUrl(backendUrl)}/test/message`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Munim-Test-Token': token
+        },
+        body: JSON.stringify(payload)
+      });
+
+      const data = await response.json();
+      setResult({ http_status: response.status, ...data });
+
+      if (!response.ok) {
+        throw new Error(data?.detail || data?.message || 'AI Munim request failed.');
+      }
+
+      setStatus('success');
+    } catch (requestError) {
+      setStatus('error');
+      setError(requestError.message || 'Unable to send request to AI Munim.');
+    }
+  }
+
+  function sendText() {
+    postJson({
+      tenant_id: tenantId,
+      sender,
+      message
+    });
+  }
+
+  function continueTask(nextMessage) {
+    postJson({
+      tenant_id: tenantId,
+      sender,
+      continue_task: activeTaskId,
+      message: nextMessage
+    });
+  }
+
+  async function startRecording() {
+    if (!mediaSupported) {
+      setError('MediaRecorder is not supported in this browser.');
+      return;
+    }
+
+    setError('');
+
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const recorder = new MediaRecorder(stream);
+      chunksRef.current = [];
+
+      recorder.ondataavailable = (event) => {
+        if (event.data.size > 0) {
+          chunksRef.current.push(event.data);
+        }
+      };
+
+      recorder.onstop = () => {
+        const blob = new Blob(chunksRef.current, { type: recorder.mimeType || 'audio/webm' });
+        setAudioBlob(blob);
+        setAudioUrl(URL.createObjectURL(blob));
+        stream.getTracks().forEach((track) => track.stop());
+        setRecordingStatus('Recording ready to send');
+      };
+
+      mediaRecorderRef.current = recorder;
+      recorder.start();
+      setIsRecording(true);
+      setRecordingStatus('Recording...');
+    } catch {
+      setError('Microphone access was blocked or unavailable.');
+      setRecordingStatus('Idle');
+    }
+  }
+
+  function stopRecording() {
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
+      mediaRecorderRef.current.stop();
+      setIsRecording(false);
+    }
+  }
+
+  async function sendVoice() {
+    if (!ensureToken()) return;
+    if (!audioBlob) {
+      setError('Record audio before sending a voice test.');
+      return;
+    }
+
+    setStatus('loading');
+    setError('');
+
+    const formData = new FormData();
+    formData.append('tenant_id', tenantId);
+    formData.append('sender', sender);
+    formData.append('audio_file', audioBlob, 'munim-lab-audio.webm');
+
+    try {
+      const response = await fetch(`${normalizeBackendUrl(backendUrl)}/test/voice`, {
+        method: 'POST',
+        headers: {
+          'X-Munim-Test-Token': token
+        },
+        body: formData
+      });
+
+      const data = await response.json();
+      setResult({ http_status: response.status, ...data });
+
+      if (!response.ok) {
+        throw new Error(data?.detail || data?.message || 'AI Munim voice request failed.');
+      }
+
+      setStatus('success');
+    } catch (requestError) {
+      setStatus('error');
+      setError(requestError.message || 'Unable to send voice request to AI Munim.');
+    }
+  }
+
+  return (
+    <main className="munim-lab">
+      <section className="munim-lab-hero">
+        <a className="brand" href="/" aria-label="Clickdine.in home">
+          <BrandLogo />
+        </a>
+        <div>
+          <p className="munim-lab-eyebrow">Hidden test route</p>
+          <h1>AI Munim Lab Console</h1>
+          <p>Temporary browser test channel for AI Munim. WhatsApp is bypassed.</p>
+        </div>
+      </section>
+
+      <section className="munim-lab-notice">
+        This lab bypasses WhatsApp and is for development testing only. Do not share the test token.
+      </section>
+
+      <section className="munim-lab-grid">
+        <div className="munim-lab-stack">
+          <article className="munim-lab-card">
+            <h2>Configuration</h2>
+            <label>
+              Backend URL
+              <input value={backendUrl} onChange={(event) => setBackendUrl(event.target.value)} />
+            </label>
+            <label>
+              Test token
+              <input
+                type="password"
+                value={token}
+                onChange={(event) => handleTokenChange(event.target.value)}
+                placeholder="Enter token from AI Munim .env"
+              />
+            </label>
+            <label>
+              Tenant ID
+              <input value={tenantId} onChange={(event) => setTenantId(event.target.value)} />
+            </label>
+            <label>
+              Sender
+              <input value={sender} onChange={(event) => setSender(event.target.value)} />
+            </label>
+          </article>
+
+          <article className="munim-lab-card">
+            <h2>Text message test</h2>
+            <label>
+              Message
+              <textarea value={message} onChange={(event) => setMessage(event.target.value)} />
+            </label>
+            <button type="button" onClick={sendText} disabled={isLoading}>
+              {isLoading ? 'Sending...' : 'Send Text'}
+            </button>
+            {activeTaskId ? (
+              <div className="munim-lab-approval">
+                <span>Task ID: <strong>{activeTaskId}</strong></span>
+                <div>
+                  <button type="button" onClick={() => continueTask('approve')} disabled={isLoading}>Approve</button>
+                  <button type="button" className="munim-lab-secondary" onClick={() => continueTask('reject')} disabled={isLoading}>Reject</button>
+                </div>
+              </div>
+            ) : null}
+          </article>
+
+          <article className="munim-lab-card">
+            <h2>Voice test</h2>
+            {!mediaSupported ? (
+              <p className="munim-lab-error">MediaRecorder is not supported in this browser.</p>
+            ) : null}
+            <p className="munim-lab-muted">Status: {recordingStatus}</p>
+            <div className="munim-lab-actions">
+              <button type="button" onClick={startRecording} disabled={!mediaSupported || isRecording}>Record</button>
+              <button type="button" className="munim-lab-secondary" onClick={stopRecording} disabled={!isRecording}>Stop</button>
+              <button type="button" onClick={sendVoice} disabled={!audioBlob || isLoading}>Send Voice</button>
+            </div>
+            {audioUrl ? <audio controls src={audioUrl} /> : null}
+          </article>
+        </div>
+
+        <article className="munim-lab-card">
+          <h2>Response</h2>
+          {error ? <p className="munim-lab-error">{error}</p> : null}
+          <ResponsePanel result={result} />
+        </article>
+      </section>
     </main>
   );
 }

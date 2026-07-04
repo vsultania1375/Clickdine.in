@@ -1180,6 +1180,254 @@ h1 span {
   font-weight: 720;
 }
 
+.munim-lab {
+  width: min(1180px, calc(100% - 40px));
+  min-height: 100vh;
+  margin: 0 auto;
+  padding: 34px 0 72px;
+}
+
+.munim-lab-hero {
+  display: grid;
+  gap: 28px;
+  margin-bottom: 18px;
+}
+
+.munim-lab-eyebrow {
+  margin: 0 0 10px;
+  color: var(--blue);
+  font-size: 0.82rem;
+  font-weight: 850;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.munim-lab h1 {
+  max-width: 760px;
+  margin: 0 0 14px;
+  color: var(--heading);
+  font-size: clamp(2.4rem, 5vw, 4.5rem);
+  line-height: 1;
+}
+
+.munim-lab h2 {
+  margin: 0 0 18px;
+  color: var(--heading);
+  font-size: 1.16rem;
+}
+
+.munim-lab p {
+  color: var(--body);
+  line-height: 1.7;
+}
+
+.munim-lab-notice,
+.munim-lab-card {
+  border: 1px solid var(--border);
+  border-radius: 24px;
+  background: var(--card);
+  box-shadow: var(--shadow-sm);
+}
+
+.munim-lab-notice {
+  margin-bottom: 18px;
+  padding: 16px 18px;
+  color: #92400e;
+  background: rgba(254, 243, 199, 0.68);
+}
+
+.munim-lab-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(360px, 1.1fr);
+  gap: 18px;
+  align-items: start;
+}
+
+.munim-lab-stack {
+  display: grid;
+  gap: 18px;
+}
+
+.munim-lab-card {
+  padding: 22px;
+}
+
+.munim-lab label {
+  display: grid;
+  gap: 8px;
+  margin-top: 14px;
+  color: var(--heading);
+  font-size: 0.9rem;
+  font-weight: 720;
+}
+
+.munim-lab input,
+.munim-lab textarea {
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  outline: none;
+  color: var(--heading);
+  background: rgba(255, 255, 255, 0.92);
+  transition: border-color 180ms ease, box-shadow 180ms ease;
+}
+
+.munim-lab input {
+  height: 46px;
+  padding: 0 13px;
+}
+
+.munim-lab textarea {
+  min-height: 120px;
+  resize: vertical;
+  padding: 13px;
+}
+
+.munim-lab input:focus,
+.munim-lab textarea:focus {
+  border-color: rgba(37, 99, 235, 0.5);
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.09);
+}
+
+.munim-lab button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  margin-top: 16px;
+  border: 0;
+  border-radius: 999px;
+  padding: 0 18px;
+  color: #ffffff;
+  background: linear-gradient(135deg, var(--blue), #1d4ed8 56%, var(--cyan));
+  box-shadow: 0 12px 28px rgba(37, 99, 235, 0.18);
+  font-weight: 800;
+  cursor: pointer;
+  transition: transform 180ms ease, box-shadow 180ms ease, opacity 180ms ease;
+}
+
+.munim-lab button:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 18px 36px rgba(37, 99, 235, 0.2);
+}
+
+.munim-lab button:disabled {
+  cursor: not-allowed;
+  opacity: 0.58;
+}
+
+.munim-lab-secondary {
+  color: var(--heading) !important;
+  border: 1px solid var(--border) !important;
+  background: rgba(255, 255, 255, 0.9) !important;
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.06) !important;
+}
+
+.munim-lab-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.munim-lab-actions button,
+.munim-lab-approval button {
+  margin-top: 0;
+}
+
+.munim-lab audio {
+  width: 100%;
+  margin-top: 16px;
+}
+
+.munim-lab-muted {
+  color: var(--muted) !important;
+}
+
+.munim-lab-error {
+  margin: 0 0 14px;
+  color: #b91c1c !important;
+  font-weight: 720;
+}
+
+.munim-lab-approval {
+  display: grid;
+  gap: 12px;
+  margin-top: 16px;
+  border: 1px solid rgba(16, 185, 129, 0.22);
+  border-radius: 16px;
+  padding: 14px;
+  background: rgba(16, 185, 129, 0.08);
+}
+
+.munim-lab-approval span {
+  color: #047857;
+}
+
+.munim-lab-approval div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.munim-lab-empty {
+  border: 1px dashed var(--border);
+  border-radius: 18px;
+  padding: 18px;
+  color: var(--muted);
+  background: rgba(248, 250, 252, 0.74);
+}
+
+.munim-lab-response dl {
+  display: grid;
+  gap: 12px;
+  margin: 0 0 18px;
+}
+
+.munim-lab-result-row {
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 13px;
+  background: rgba(248, 250, 252, 0.72);
+}
+
+.munim-lab-result-row dt {
+  margin-bottom: 6px;
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 850;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.munim-lab-result-row dd {
+  margin: 0;
+  color: var(--heading);
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+
+.munim-lab pre {
+  overflow: auto;
+  margin: 0;
+  border-radius: 12px;
+  padding: 12px;
+  color: #0f172a;
+  background: #f1f5f9;
+  font-size: 0.86rem;
+  line-height: 1.55;
+}
+
+.munim-lab details {
+  border-top: 1px solid var(--border);
+  padding-top: 16px;
+}
+
+.munim-lab summary {
+  cursor: pointer;
+  color: var(--blue);
+  font-weight: 800;
+}
+
 @keyframes float-card {
   0%, 100% {
     transform: translate3d(0, 0, 0);
@@ -1384,6 +1632,19 @@ h1 span {
     align-items: flex-start;
     flex-direction: column;
     margin-top: 66px;
+  }
+
+  .munim-lab {
+    width: min(100% - 28px, 1180px);
+    padding-top: 24px;
+  }
+
+  .munim-lab-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .munim-lab-card {
+    padding: 18px;
   }
 }
 

@@ -4,4 +4,7 @@
 /data-deletion /data-deletion/index.html 200
 /data-deletion/ /data-deletion/index.html 200
 /data-deletion/* /data-deletion/index.html 200
+/munim-lab /index.html 200
+/munim-lab/ /index.html 200
+/munim-lab/* /index.html 200
 /* /index.html 200
