@@ -124,8 +124,16 @@ function HomePage() {
   );
 }
 
+function normalizePathname(pathname) {
+  if (!pathname || pathname === '/') {
+    return '/';
+  }
+
+  return pathname.replace(/\/+$/, '');
+}
+
 export default function App() {
-  const path = window.location.pathname.replace(/\/$/, '') || '/';
+  const path = normalizePathname(window.location.pathname);
   const isPrivacyPage = path === '/privacy';
   const isDeletionPage = path === '/data-deletion';
 
