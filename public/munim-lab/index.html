@@ -6,273 +6,66 @@
     <meta name="robots" content="noindex,nofollow" />
     <title>AI Munim Lab Console | Clickdine.in</title>
     <style>
-      :root {
-        --bg: #f5f8fb;
-        --card: #ffffff;
-        --ink: #102033;
-        --muted: #667085;
-        --line: #d9e2ec;
-        --green: #16a34a;
-        --green-dark: #12813b;
-        --navy: #071933;
-        --danger: #b42318;
-        --warning: #b54708;
-        --shadow: 0 18px 50px rgba(15, 23, 42, 0.1);
-      }
-
       * { box-sizing: border-box; }
-
       body {
         margin: 0;
         font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-        background:
-          radial-gradient(circle at top left, rgba(22, 163, 74, 0.13), transparent 32rem),
-          radial-gradient(circle at top right, rgba(7, 25, 51, 0.12), transparent 34rem),
-          var(--bg);
-        color: var(--ink);
+        color: #102033;
+        background: radial-gradient(circle at top left, rgba(22, 163, 74, .14), transparent 32rem), #f5f8fb;
       }
-
-      .shell {
-        width: min(1180px, calc(100% - 32px));
-        margin: 0 auto;
-        padding: 40px 0 56px;
-      }
-
-      .hero {
-        display: grid;
-        grid-template-columns: 1fr auto;
-        gap: 24px;
-        align-items: start;
-        margin-bottom: 22px;
-      }
-
-      .eyebrow {
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        padding: 7px 12px;
-        border-radius: 999px;
-        background: #e9f8ef;
-        color: var(--green-dark);
-        font-size: 13px;
-        font-weight: 700;
-        margin-bottom: 14px;
-      }
-
-      h1 {
-        margin: 0;
-        font-size: clamp(32px, 5vw, 56px);
-        letter-spacing: -0.045em;
-        line-height: 0.95;
-      }
-
-      .subtitle {
-        margin: 18px 0 0;
-        max-width: 720px;
-        color: var(--muted);
-        font-size: 17px;
-        line-height: 1.6;
-      }
-
-      .badge-card {
-        min-width: 240px;
-        padding: 18px;
-        border: 1px solid var(--line);
-        border-radius: 20px;
-        background: rgba(255,255,255,0.82);
-        box-shadow: var(--shadow);
-      }
-
-      .badge-card strong { display: block; margin-bottom: 6px; }
-      .badge-card span { color: var(--muted); font-size: 14px; }
-
-      .grid {
-        display: grid;
-        grid-template-columns: 0.92fr 1.08fr;
-        gap: 20px;
-      }
-
-      .card {
-        background: var(--card);
-        border: 1px solid var(--line);
-        border-radius: 22px;
-        box-shadow: var(--shadow);
-        padding: 22px;
-      }
-
-      .card h2 {
-        margin: 0 0 16px;
-        font-size: 20px;
-        letter-spacing: -0.02em;
-      }
-
-      label {
-        display: block;
-        font-weight: 700;
-        margin: 14px 0 7px;
-        font-size: 14px;
-      }
-
-      input, textarea {
-        width: 100%;
-        border: 1px solid var(--line);
-        border-radius: 14px;
-        padding: 12px 13px;
-        font: inherit;
-        color: var(--ink);
-        background: #fbfdff;
-        outline: none;
-      }
-
-      input:focus, textarea:focus {
-        border-color: rgba(22, 163, 74, 0.75);
-        box-shadow: 0 0 0 4px rgba(22, 163, 74, 0.12);
-      }
-
+      main { width: min(1100px, calc(100% - 32px)); margin: 0 auto; padding: 36px 0 56px; }
+      .top { display: flex; justify-content: space-between; gap: 18px; align-items: flex-start; margin-bottom: 20px; }
+      .pill { display: inline-block; padding: 7px 12px; border-radius: 999px; background: #e9f8ef; color: #12813b; font-size: 13px; font-weight: 800; }
+      h1 { margin: 14px 0 10px; font-size: clamp(32px, 5vw, 56px); letter-spacing: -.045em; line-height: .98; }
+      p { color: #667085; line-height: 1.6; }
+      .grid { display: grid; grid-template-columns: .9fr 1.1fr; gap: 18px; }
+      .card { background: white; border: 1px solid #d9e2ec; border-radius: 22px; box-shadow: 0 18px 50px rgba(15,23,42,.1); padding: 22px; }
+      label { display: block; margin: 14px 0 7px; font-weight: 800; font-size: 14px; }
+      input, textarea { width: 100%; border: 1px solid #d9e2ec; border-radius: 14px; padding: 12px 13px; font: inherit; background: #fbfdff; color: #102033; }
       textarea { min-height: 120px; resize: vertical; }
-
-      .row {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 12px;
-      }
-
-      .actions {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 10px;
-        margin-top: 16px;
-      }
-
-      button {
-        border: 0;
-        border-radius: 999px;
-        padding: 12px 18px;
-        font: inherit;
-        font-weight: 800;
-        cursor: pointer;
-        transition: transform 0.15s ease, opacity 0.15s ease;
-      }
-
-      button:hover { transform: translateY(-1px); }
-      button:disabled { cursor: not-allowed; opacity: 0.55; transform: none; }
-
-      .primary { background: var(--green); color: white; }
-      .secondary { background: #eaf0f6; color: var(--navy); }
-      .danger { background: #fee4e2; color: var(--danger); }
-      .ghost { background: transparent; border: 1px solid var(--line); color: var(--navy); }
-
-      .notice {
-        margin-top: 18px;
-        padding: 13px 14px;
-        border-radius: 16px;
-        background: #fff7ed;
-        color: var(--warning);
-        font-size: 14px;
-        line-height: 1.45;
-      }
-
-      .status {
-        min-height: 22px;
-        margin: 12px 0 0;
-        color: var(--muted);
-        font-size: 14px;
-      }
-
-      .error { color: var(--danger); font-weight: 700; }
-      .ok { color: var(--green-dark); font-weight: 700; }
-
-      .response {
-        display: grid;
-        gap: 12px;
-      }
-
-      .response-item {
-        border: 1px solid var(--line);
-        border-radius: 16px;
-        padding: 14px;
-        background: #fbfdff;
-      }
-
-      .response-item small {
-        display: block;
-        color: var(--muted);
-        font-weight: 800;
-        text-transform: uppercase;
-        letter-spacing: 0.08em;
-        margin-bottom: 8px;
-      }
-
-      pre {
-        white-space: pre-wrap;
-        word-break: break-word;
-        margin: 0;
-        font-size: 13px;
-        line-height: 1.5;
-      }
-
-      details {
-        border: 1px dashed var(--line);
-        border-radius: 16px;
-        padding: 12px;
-        background: #fff;
-      }
-
-      details summary {
-        cursor: pointer;
-        font-weight: 800;
-      }
-
+      input:focus, textarea:focus { outline: none; border-color: #16a34a; box-shadow: 0 0 0 4px rgba(22, 163, 74, .12); }
+      .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+      .actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 16px; }
+      button { border: 0; border-radius: 999px; padding: 12px 18px; font: inherit; font-weight: 900; cursor: pointer; }
+      button:disabled { opacity: .55; cursor: not-allowed; }
+      .primary { background: #16a34a; color: white; }
+      .secondary { background: #eaf0f6; color: #071933; }
+      .danger { background: #fee4e2; color: #b42318; }
+      .notice { margin-top: 18px; padding: 13px 14px; border-radius: 16px; background: #fff7ed; color: #b54708; font-size: 14px; }
+      .status { min-height: 22px; margin-top: 12px; color: #667085; font-size: 14px; }
+      .error { color: #b42318; font-weight: 800; }
+      .ok { color: #12813b; font-weight: 800; }
+      .response { margin-top: 18px; display: grid; gap: 12px; }
+      .item { border: 1px solid #d9e2ec; border-radius: 16px; padding: 14px; background: #fbfdff; }
+      .item small { display: block; color: #667085; font-weight: 900; text-transform: uppercase; letter-spacing: .08em; margin-bottom: 8px; }
+      pre { margin: 0; white-space: pre-wrap; word-break: break-word; font-size: 13px; line-height: 1.5; }
+      details { border: 1px dashed #d9e2ec; border-radius: 16px; padding: 12px; background: #fff; }
       audio { width: 100%; margin-top: 12px; }
-
-      .voice-box {
-        margin-top: 20px;
-        padding-top: 18px;
-        border-top: 1px solid var(--line);
-      }
-
-      @media (max-width: 880px) {
-        .hero, .grid { grid-template-columns: 1fr; }
-        .badge-card { min-width: 0; }
-        .row { grid-template-columns: 1fr; }
-        .shell { padding-top: 26px; }
-      }
+      @media (max-width: 860px) { .top, .grid, .row { display: block; } .card { margin-bottom: 16px; } }
     </style>
   </head>
   <body>
-    <main class="shell">
-      <section class="hero">
+    <main>
+      <section class="top">
         <div>
-          <div class="eyebrow">Internal test console</div>
+          <span class="pill">Internal test console</span>
           <h1>AI Munim Lab Console</h1>
-          <p class="subtitle">Temporary browser test channel for AI Munim. WhatsApp is bypassed; this page sends text or voice to the AI Munim backend so the core workflow can be tested.</p>
+          <p>Temporary browser test channel. WhatsApp is bypassed; text and voice are sent directly to the AI Munim backend.</p>
         </div>
-        <aside class="badge-card">
-          <strong>Backend</strong>
-          <span id="backend-label">https://wa.clickdine.in</span>
-        </aside>
+        <div class="card"><strong>Backend</strong><p id="backendLabel">https://wa.clickdine.in</p></div>
       </section>
 
       <section class="grid">
         <div class="card">
           <h2>Configuration</h2>
           <label for="backendUrl">Backend URL</label>
-          <input id="backendUrl" value="https://wa.clickdine.in" autocomplete="off" />
-
+          <input id="backendUrl" value="https://wa.clickdine.in" />
           <label for="token">Test token</label>
-          <input id="token" type="password" placeholder="Paste MUNIM_TEST_CHANNEL_TOKEN" autocomplete="off" />
-
+          <input id="token" type="password" placeholder="Paste MUNIM_TEST_CHANNEL_TOKEN" />
           <div class="row">
-            <div>
-              <label for="tenantId">Tenant ID</label>
-              <input id="tenantId" value="demo-business" autocomplete="off" />
-            </div>
-            <div>
-              <label for="sender">Sender</label>
-              <input id="sender" value="919813423175" autocomplete="off" />
-            </div>
+            <div><label for="tenantId">Tenant ID</label><input id="tenantId" value="demo-business" /></div>
+            <div><label for="sender">Sender</label><input id="sender" value="919813423175" /></div>
           </div>
-
           <div class="notice">This lab bypasses WhatsApp and is for development testing only. Do not share the test token.</div>
         </div>
 
@@ -286,279 +79,111 @@
             <button class="danger" id="rejectBtn" disabled>Reject</button>
           </div>
           <div class="status" id="textStatus"></div>
-
-          <div class="voice-box">
-            <h2>Send voice</h2>
-            <div class="actions">
-              <button class="secondary" id="recordBtn">Record</button>
-              <button class="ghost" id="stopBtn" disabled>Stop</button>
-              <button class="primary" id="sendVoiceBtn" disabled>Send Voice</button>
-            </div>
-            <div class="status" id="voiceStatus"></div>
-            <audio id="audioPreview" controls hidden></audio>
+          <hr style="border:0;border-top:1px solid #d9e2ec;margin:22px 0" />
+          <h2>Send voice</h2>
+          <div class="actions">
+            <button class="secondary" id="recordBtn">Record</button>
+            <button class="secondary" id="stopBtn" disabled>Stop</button>
+            <button class="primary" id="sendVoice" disabled>Send Voice</button>
           </div>
+          <div class="status" id="voiceStatus"></div>
+          <audio id="audioPreview" controls hidden></audio>
         </div>
       </section>
 
-      <section class="card" style="margin-top: 20px;">
-        <h2>Response</h2>
-        <div id="response" class="response">
-          <div class="response-item"><small>Status</small><pre>Waiting for message...</pre></div>
-        </div>
-      </section>
+      <section class="card response" id="response"><div class="item"><small>Status</small><pre>Waiting for message...</pre></div></section>
     </main>
 
     <script>
-      const state = { taskId: null, mediaRecorder: null, chunks: [], audioBlob: null };
-
+      const state = { taskId: null, recorder: null, chunks: [], audioBlob: null };
       const $ = (id) => document.getElementById(id);
-      const fields = {
-        backendUrl: $('backendUrl'),
-        token: $('token'),
-        tenantId: $('tenantId'),
-        sender: $('sender'),
-        message: $('message'),
-        response: $('response'),
-        textStatus: $('textStatus'),
-        voiceStatus: $('voiceStatus'),
-        backendLabel: $('backend-label'),
-        approveBtn: $('approveBtn'),
-        rejectBtn: $('rejectBtn'),
-        recordBtn: $('recordBtn'),
-        stopBtn: $('stopBtn'),
-        sendVoiceBtn: $('sendVoiceBtn'),
-        audioPreview: $('audioPreview'),
+      const el = {
+        backendUrl: $('backendUrl'), token: $('token'), tenantId: $('tenantId'), sender: $('sender'),
+        message: $('message'), sendText: $('sendText'), approveBtn: $('approveBtn'), rejectBtn: $('rejectBtn'),
+        textStatus: $('textStatus'), response: $('response'), backendLabel: $('backendLabel'),
+        recordBtn: $('recordBtn'), stopBtn: $('stopBtn'), sendVoice: $('sendVoice'), voiceStatus: $('voiceStatus'), audioPreview: $('audioPreview')
       };
 
-      function loadStoredValues() {
-        fields.backendUrl.value = localStorage.getItem('munimLabBackendUrl') || fields.backendUrl.value;
-        fields.token.value = sessionStorage.getItem('munimLabToken') || '';
-        fields.tenantId.value = localStorage.getItem('munimLabTenantId') || fields.tenantId.value;
-        fields.sender.value = localStorage.getItem('munimLabSender') || fields.sender.value;
-        fields.backendLabel.textContent = fields.backendUrl.value;
+      function esc(v) { return String(v).replace(/[&<>'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c])); }
+      function save() {
+        localStorage.setItem('munimLabBackendUrl', el.backendUrl.value.trim());
+        localStorage.setItem('munimLabTenantId', el.tenantId.value.trim());
+        localStorage.setItem('munimLabSender', el.sender.value.trim());
+        sessionStorage.setItem('munimLabToken', el.token.value.trim());
+        el.backendLabel.textContent = el.backendUrl.value.trim();
       }
-
-      function persistValues() {
-        localStorage.setItem('munimLabBackendUrl', fields.backendUrl.value.trim());
-        sessionStorage.setItem('munimLabToken', fields.token.value.trim());
-        localStorage.setItem('munimLabTenantId', fields.tenantId.value.trim());
-        localStorage.setItem('munimLabSender', fields.sender.value.trim());
-        fields.backendLabel.textContent = fields.backendUrl.value.trim();
+      function load() {
+        el.backendUrl.value = localStorage.getItem('munimLabBackendUrl') || el.backendUrl.value;
+        el.tenantId.value = localStorage.getItem('munimLabTenantId') || el.tenantId.value;
+        el.sender.value = localStorage.getItem('munimLabSender') || el.sender.value;
+        el.token.value = sessionStorage.getItem('munimLabToken') || '';
+        el.backendLabel.textContent = el.backendUrl.value;
       }
-
-      function config() {
-        persistValues();
-        const backendUrl = fields.backendUrl.value.trim().replace(/\/+$/, '');
-        const token = fields.token.value.trim();
-        if (!backendUrl) throw new Error('Backend URL is required');
+      function cfg() {
+        save();
+        const token = el.token.value.trim();
         if (!token) throw new Error('Test token is required');
-        return {
-          backendUrl,
-          token,
-          tenantId: fields.tenantId.value.trim() || 'demo-business',
-          sender: fields.sender.value.trim() || '919813423175',
-        };
+        return { backend: el.backendUrl.value.trim().replace(/\/+$/, ''), token, tenant: el.tenantId.value.trim(), sender: el.sender.value.trim() };
       }
-
-      function setBusy(button, busy) {
-        button.disabled = busy;
-        button.textContent = busy ? 'Working...' : button.dataset.label;
+      function setStatus(node, msg, cls='status') { node.className = cls; node.textContent = msg; }
+      function render(data) {
+        if (data.task_id) state.taskId = data.task_id;
+        el.approveBtn.disabled = !state.taskId;
+        el.rejectBtn.disabled = !state.taskId;
+        const parts = [];
+        const add = (k, v) => { if (v !== undefined && v !== null && v !== '') parts.push(`<div class="item"><small>${esc(k)}</small><pre>${esc(typeof v === 'string' ? v : JSON.stringify(v, null, 2))}</pre></div>`); };
+        add('Status', data.status || 'processed'); add('Transcript', data.transcript); add('Workflow', data.workflow || (data.intent && data.intent.workflow)); add('Task ID', data.task_id); add('State', data.state); add('Reply', data.reply); add('Confirmation card', data.confirmation_card); add('Resolved', data.resolved); add('Warnings', data.warnings);
+        parts.push(`<details><summary>Raw JSON</summary><pre>${esc(JSON.stringify(data, null, 2))}</pre></details>`);
+        el.response.innerHTML = parts.join('');
       }
-
-      function renderResponse(data) {
-        state.taskId = data && data.task_id ? data.task_id : state.taskId;
-        fields.approveBtn.disabled = !state.taskId;
-        fields.rejectBtn.disabled = !state.taskId;
-        const items = [];
-        const add = (label, value) => {
-          if (value === undefined || value === null || value === '') return;
-          const text = typeof value === 'string' ? value : JSON.stringify(value, null, 2);
-          items.push(`<div class="response-item"><small>${escapeHtml(label)}</small><pre>${escapeHtml(text)}</pre></div>`);
-        };
-        add('Status', data.status || 'processed');
-        add('Transcript', data.transcript);
-        add('Workflow', data.workflow || (data.intent && data.intent.workflow));
-        add('Task ID', data.task_id);
-        add('State', data.state);
-        add('Reply', data.reply);
-        add('Confirmation card', data.confirmation_card);
-        add('Resolved', data.resolved);
-        add('Pending confirmation', data.pending_confirmation);
-        add('Warnings', data.warnings);
-        items.push(`<details><summary>Raw JSON</summary><pre>${escapeHtml(JSON.stringify(data, null, 2))}</pre></details>`);
-        fields.response.innerHTML = items.join('');
-      }
-
-      function renderError(error) {
-        fields.response.innerHTML = `<div class="response-item"><small>Error</small><pre>${escapeHtml(error.message || String(error))}</pre></div>`;
-      }
-
-      function escapeHtml(value) {
-        return String(value).replace(/[&<>'"]/g, (ch) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[ch]));
-      }
-
-      async function postJson(path, body) {
-        const cfg = config();
-        const res = await fetch(`${cfg.backendUrl}${path}`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'X-Munim-Test-Token': cfg.token,
-          },
-          body: JSON.stringify(body),
-        });
-        const data = await res.json().catch(() => ({ status: 'error', message: 'Invalid JSON response' }));
+      function renderError(err) { el.response.innerHTML = `<div class="item"><small>Error</small><pre>${esc(err.message || err)}</pre></div>`; }
+      async function postMessage(message, continueTask=null) {
+        const c = cfg();
+        const res = await fetch(`${c.backend}/test/message`, { method:'POST', headers:{'Content-Type':'application/json','X-Munim-Test-Token':c.token}, body: JSON.stringify({ tenant_id:c.tenant, sender:c.sender, message, continue_task:continueTask }) });
+        const data = await res.json().catch(() => ({message:'Invalid JSON response'}));
         if (!res.ok) throw new Error(data.detail || data.message || `HTTP ${res.status}`);
         return data;
       }
-
-      async function sendMessage(message, continueTask = null) {
-        const cfg = config();
-        return postJson('/test/message', {
-          tenant_id: cfg.tenantId,
-          sender: cfg.sender,
-          message,
-          continue_task: continueTask,
-        });
-      }
-
-      async function sendVoice() {
-        if (!state.audioBlob) throw new Error('Record audio first');
-        const cfg = config();
-        const form = new FormData();
-        form.append('tenant_id', cfg.tenantId);
-        form.append('sender', cfg.sender);
-        form.append('audio_file', state.audioBlob, 'munim-lab-recording.webm');
-        const res = await fetch(`${cfg.backendUrl}/test/voice`, {
-          method: 'POST',
-          headers: { 'X-Munim-Test-Token': cfg.token },
-          body: form,
-        });
-        const data = await res.json().catch(() => ({ status: 'error', message: 'Invalid JSON response' }));
-        if (!res.ok) throw new Error(data.detail || data.message || `HTTP ${res.status}`);
-        return data;
-      }
-
-      fields.sendText.dataset.label = 'Send Text';
-      fields.approveBtn.dataset.label = 'Approve';
-      fields.rejectBtn.dataset.label = 'Reject';
-      fields.recordBtn.dataset.label = 'Record';
-      fields.stopBtn.dataset.label = 'Stop';
-      fields.sendVoiceBtn.dataset.label = 'Send Voice';
-
-      fields.sendText.addEventListener('click', async () => {
-        fields.textStatus.textContent = 'Sending...';
-        fields.textStatus.className = 'status';
-        setBusy(fields.sendText, true);
-        try {
-          const data = await sendMessage(fields.message.value);
-          renderResponse(data);
-          fields.textStatus.textContent = 'Processed';
-          fields.textStatus.className = 'status ok';
-        } catch (error) {
-          renderError(error);
-          fields.textStatus.textContent = error.message;
-          fields.textStatus.className = 'status error';
-        } finally {
-          setBusy(fields.sendText, false);
-        }
+      el.sendText.addEventListener('click', async () => {
+        setStatus(el.textStatus, 'Sending...'); el.sendText.disabled = true;
+        try { render(await postMessage(el.message.value)); setStatus(el.textStatus, 'Processed', 'status ok'); }
+        catch (e) { renderError(e); setStatus(el.textStatus, e.message, 'status error'); }
+        finally { el.sendText.disabled = false; }
       });
-
-      fields.approveBtn.addEventListener('click', async () => {
+      el.approveBtn.addEventListener('click', async () => {
         if (!state.taskId) return;
-        fields.textStatus.textContent = 'Approving...';
-        try {
-          const data = await sendMessage('approve', state.taskId);
-          renderResponse(data);
-          fields.textStatus.textContent = 'Approval processed';
-          fields.textStatus.className = 'status ok';
-        } catch (error) {
-          renderError(error);
-          fields.textStatus.textContent = error.message;
-          fields.textStatus.className = 'status error';
-        }
+        try { setStatus(el.textStatus, 'Approving...'); render(await postMessage('approve', state.taskId)); setStatus(el.textStatus, 'Approval processed', 'status ok'); }
+        catch (e) { renderError(e); setStatus(el.textStatus, e.message, 'status error'); }
       });
-
-      fields.rejectBtn.addEventListener('click', async () => {
+      el.rejectBtn.addEventListener('click', async () => {
         if (!state.taskId) return;
-        fields.textStatus.textContent = 'Rejecting...';
+        try { setStatus(el.textStatus, 'Rejecting...'); render(await postMessage('reject', state.taskId)); setStatus(el.textStatus, 'Rejection processed', 'status ok'); }
+        catch (e) { renderError(e); setStatus(el.textStatus, e.message, 'status error'); }
+      });
+      el.recordBtn.addEventListener('click', async () => {
+        if (!navigator.mediaDevices || !window.MediaRecorder) { setStatus(el.voiceStatus, 'MediaRecorder is not supported.', 'status error'); return; }
         try {
-          const data = await sendMessage('reject', state.taskId);
-          renderResponse(data);
-          fields.textStatus.textContent = 'Rejection processed';
-          fields.textStatus.className = 'status ok';
-        } catch (error) {
-          renderError(error);
-          fields.textStatus.textContent = error.message;
-          fields.textStatus.className = 'status error';
-        }
+          const stream = await navigator.mediaDevices.getUserMedia({audio:true});
+          state.chunks = []; state.recorder = new MediaRecorder(stream);
+          state.recorder.ondataavailable = e => { if (e.data.size) state.chunks.push(e.data); };
+          state.recorder.onstop = () => { stream.getTracks().forEach(t => t.stop()); state.audioBlob = new Blob(state.chunks,{type:'audio/webm'}); el.audioPreview.src = URL.createObjectURL(state.audioBlob); el.audioPreview.hidden = false; el.sendVoice.disabled = false; setStatus(el.voiceStatus, 'Recording ready.', 'status ok'); };
+          state.recorder.start(); el.recordBtn.disabled = true; el.stopBtn.disabled = false; el.sendVoice.disabled = true; setStatus(el.voiceStatus, 'Recording...');
+        } catch(e) { setStatus(el.voiceStatus, e.message, 'status error'); }
       });
-
-      fields.recordBtn.addEventListener('click', async () => {
-        if (!navigator.mediaDevices || !window.MediaRecorder) {
-          fields.voiceStatus.textContent = 'MediaRecorder is not supported in this browser.';
-          fields.voiceStatus.className = 'status error';
-          return;
-        }
+      el.stopBtn.addEventListener('click', () => { if (state.recorder && state.recorder.state !== 'inactive') { state.recorder.stop(); el.recordBtn.disabled = false; el.stopBtn.disabled = true; } });
+      el.sendVoice.addEventListener('click', async () => {
         try {
-          const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-          state.chunks = [];
-          state.mediaRecorder = new MediaRecorder(stream);
-          state.mediaRecorder.ondataavailable = (event) => {
-            if (event.data && event.data.size > 0) state.chunks.push(event.data);
-          };
-          state.mediaRecorder.onstop = () => {
-            stream.getTracks().forEach((track) => track.stop());
-            state.audioBlob = new Blob(state.chunks, { type: 'audio/webm' });
-            fields.audioPreview.src = URL.createObjectURL(state.audioBlob);
-            fields.audioPreview.hidden = false;
-            fields.sendVoiceBtn.disabled = false;
-            fields.voiceStatus.textContent = 'Recording ready to send.';
-            fields.voiceStatus.className = 'status ok';
-          };
-          state.mediaRecorder.start();
-          fields.recordBtn.disabled = true;
-          fields.stopBtn.disabled = false;
-          fields.sendVoiceBtn.disabled = true;
-          fields.voiceStatus.textContent = 'Recording...';
-          fields.voiceStatus.className = 'status';
-        } catch (error) {
-          fields.voiceStatus.textContent = error.message;
-          fields.voiceStatus.className = 'status error';
-        }
+          if (!state.audioBlob) throw new Error('Record audio first');
+          const c = cfg(); const form = new FormData(); form.append('tenant_id', c.tenant); form.append('sender', c.sender); form.append('audio_file', state.audioBlob, 'munim-lab.webm');
+          setStatus(el.voiceStatus, 'Sending voice...');
+          const res = await fetch(`${c.backend}/test/voice`, { method:'POST', headers:{'X-Munim-Test-Token':c.token}, body: form });
+          const data = await res.json().catch(() => ({message:'Invalid JSON response'}));
+          if (!res.ok) throw new Error(data.detail || data.message || `HTTP ${res.status}`);
+          render(data); setStatus(el.voiceStatus, 'Voice processed', 'status ok');
+        } catch(e) { renderError(e); setStatus(el.voiceStatus, e.message, 'status error'); }
       });
-
-      fields.stopBtn.addEventListener('click', () => {
-        if (state.mediaRecorder && state.mediaRecorder.state !== 'inactive') {
-          state.mediaRecorder.stop();
-          fields.recordBtn.disabled = false;
-          fields.stopBtn.disabled = true;
-        }
-      });
-
-      fields.sendVoiceBtn.addEventListener('click', async () => {
-        fields.voiceStatus.textContent = 'Sending voice...';
-        fields.voiceStatus.className = 'status';
-        setBusy(fields.sendVoiceBtn, true);
-        try {
-          const data = await sendVoice();
-          renderResponse(data);
-          fields.voiceStatus.textContent = 'Voice processed';
-          fields.voiceStatus.className = 'status ok';
-        } catch (error) {
-          renderError(error);
-          fields.voiceStatus.textContent = error.message;
-          fields.voiceStatus.className = 'status error';
-        } finally {
-          setBusy(fields.sendVoiceBtn, false);
-        }
-      });
-
-      ['backendUrl', 'token', 'tenantId', 'sender'].forEach((id) => {
-        fields[id].addEventListener('change', persistValues);
-      });
-
-      loadStoredValues();
+      ['backendUrl','token','tenantId','sender'].forEach(id => el[id].addEventListener('change', save));
+      load();
     </script>
   </body>
 </html>
