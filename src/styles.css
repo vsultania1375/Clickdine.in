@@ -1110,6 +1110,76 @@ h1 span {
   color: var(--muted);
 }
 
+.legal-shell {
+  width: min(920px, calc(100% - 40px));
+  min-height: 100vh;
+  margin: 0 auto;
+  padding: 34px 0 72px;
+}
+
+.legal-brand {
+  margin-bottom: 28px;
+}
+
+.legal-card {
+  border: 1px solid var(--border);
+  border-radius: 28px;
+  background: var(--card);
+  box-shadow: var(--shadow-sm);
+  padding: clamp(28px, 5vw, 54px);
+}
+
+.legal-eyebrow {
+  margin-bottom: 12px;
+  color: var(--blue);
+  font-size: 0.82rem;
+  font-weight: 850;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.legal-card h1 {
+  margin-bottom: 30px;
+  color: var(--heading);
+  font-size: clamp(2.5rem, 6vw, 4.5rem);
+  line-height: 1;
+}
+
+.legal-section {
+  padding-top: 22px;
+  border-top: 1px solid var(--border);
+}
+
+.legal-section + .legal-section {
+  margin-top: 22px;
+}
+
+.legal-section h2 {
+  margin: 0 0 12px;
+  color: var(--heading);
+  font-size: 1.22rem;
+}
+
+.legal-section p,
+.legal-section li {
+  color: var(--body);
+  line-height: 1.75;
+}
+
+.legal-section p {
+  margin: 0 0 10px;
+}
+
+.legal-section ul {
+  margin: 0;
+  padding-left: 20px;
+}
+
+.legal-section a {
+  color: var(--blue);
+  font-weight: 720;
+}
+
 @keyframes float-card {
   0%, 100% {
     transform: translate3d(0, 0, 0);

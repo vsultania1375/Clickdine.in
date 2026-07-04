@@ -63,6 +63,39 @@ function BrandLogo() {
   );
 }
 
+export function LegalPage({ title, sections }) {
+  return (
+    <main className="legal-shell">
+      <a className="brand legal-brand" href="/" aria-label="Clickdine.in home">
+        <BrandLogo />
+      </a>
+      <article className="legal-card">
+        <p className="legal-eyebrow">Clickdine.in</p>
+        <h1>{title}</h1>
+        {sections.map((section) => (
+          <section className="legal-section" key={section.heading}>
+            <h2>{section.heading}</h2>
+            {section.paragraphs?.map((paragraph) => (
+              <p key={paragraph}>
+                {paragraph.includes('@') ? (
+                  <a href={`mailto:${paragraph.replace('Email: ', '')}`}>{paragraph}</a>
+                ) : (
+                  paragraph
+                )}
+              </p>
+            ))}
+            {section.list ? (
+              <ul>
+                {section.list.map((item) => <li key={item}>{item}</li>)}
+              </ul>
+            ) : null}
+          </section>
+        ))}
+      </article>
+    </main>
+  );
+}
+
 export function Navbar() {
   return (
     <header className="navbar" role="banner">
