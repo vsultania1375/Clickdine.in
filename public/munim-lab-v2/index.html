@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex,nofollow" />
+    <title>AI Munim Lab Console | Clickdine.in</title>
+    <style>
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        color: #102033;
+        background: radial-gradient(circle at top left, rgba(22, 163, 74, .14), transparent 32rem), #f5f8fb;
+      }
+      main { width: min(1100px, calc(100% - 32px)); margin: 0 auto; padding: 36px 0 56px; }
+      .top { display: flex; justify-content: space-between; gap: 18px; align-items: flex-start; margin-bottom: 20px; }
+      .pill { display: inline-block; padding: 7px 12px; border-radius: 999px; background: #e9f8ef; color: #12813b; font-size: 13px; font-weight: 800; }
+      h1 { margin: 14px 0 10px; font-size: clamp(32px, 5vw, 56px); letter-spacing: -.045em; line-height: .98; }
+      p { color: #667085; line-height: 1.6; }
+      .grid { display: grid; grid-template-columns: .9fr 1.1fr; gap: 18px; }
+      .card { background: white; border: 1px solid #d9e2ec; border-radius: 22px; box-shadow: 0 18px 50px rgba(15,23,42,.1); padding: 22px; }
+      label { display: block; margin: 14px 0 7px; font-weight: 800; font-size: 14px; }
+      input, textarea { width: 100%; border: 1px solid #d9e2ec; border-radius: 14px; padding: 12px 13px; font: inherit; background: #fbfdff; color: #102033; }
+      textarea { min-height: 120px; resize: vertical; }
+      input:focus, textarea:focus { outline: none; border-color: #16a34a; box-shadow: 0 0 0 4px rgba(22, 163, 74, .12); }
+      .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+      .actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 16px; }
+      button { border: 0; border-radius: 999px; padding: 12px 18px; font: inherit; font-weight: 900; cursor: pointer; }
+      button:disabled { opacity: .55; cursor: not-allowed; }
+      .primary { background: #16a34a; color: white; }
+      .secondary { background: #eaf0f6; color: #071933; }
+      .danger { background: #fee4e2; color: #b42318; }
+      .notice { margin-top: 18px; padding: 13px 14px; border-radius: 16px; background: #fff7ed; color: #b54708; font-size: 14px; }
+      .status { min-height: 22px; margin-top: 12px; color: #667085; font-size: 14px; }
+      .error { color: #b42318; font-weight: 800; }
+      .ok { color: #12813b; font-weight: 800; }
+      .response { margin-top: 18px; display: grid; gap: 12px; }
+      .item { border: 1px solid #d9e2ec; border-radius: 16px; padding: 14px; background: #fbfdff; }
+      .item small { display: block; color: #667085; font-weight: 900; text-transform: uppercase; letter-spacing: .08em; margin-bottom: 8px; }
+      pre { margin: 0; white-space: pre-wrap; word-break: break-word; font-size: 13px; line-height: 1.5; }
+      details { border: 1px dashed #d9e2ec; border-radius: 16px; padding: 12px; background: #fff; }
+      audio { width: 100%; margin-top: 12px; }
+      @media (max-width: 860px) { .top, .grid, .row { display: block; } .card { margin-bottom: 16px; } }
+    </style>
+  </head>
+  <body>
+    <main>
+      <section class="top">
+        <div>
+          <span class="pill">Internal test console</span>
+          <h1>AI Munim Lab Console</h1>
+          <p>Temporary browser test channel. WhatsApp is bypassed; text and voice are sent directly to the AI Munim backend.</p>
+        </div>
+        <div class="card"><strong>Backend</strong><p id="backendLabel">https://wa.clickdine.in</p></div>
+      </section>
+
+      <section class="grid">
+        <div class="card">
+          <h2>Configuration</h2>
+          <label for="backendUrl">Backend URL</label>
+          <input id="backendUrl" value="https://wa.clickdine.in" />
+          <label for="token">Test token</label>
+          <input id="token" type="password" placeholder="Paste MUNIM_TEST_CHANNEL_TOKEN" />
+          <div class="row">
+            <div><label for="tenantId">Tenant ID</label><input id="tenantId" value="demo-business" /></div>
+            <div><label for="sender">Sender</label><input id="sender" value="919813423175" /></div>
+          </div>
+          <div class="notice">This lab bypasses WhatsApp and is for development testing only. Do not share the test token.</div>
+        </div>
+
+        <div class="card">
+          <h2>Send text</h2>
+          <label for="message">Message</label>
+          <textarea id="message">Gupta ji ko 20 cement bag ka bill banao</textarea>
+          <div class="actions">
+            <button class="primary" id="sendText">Send Text</button>
+            <button class="secondary" id="approveBtn" disabled>Approve</button>
+            <button class="danger" id="rejectBtn" disabled>Reject</button>
+          </div>
+          <div class="status" id="textStatus"></div>
+          <hr style="border:0;border-top:1px solid #d9e2ec;margin:22px 0" />
+          <h2>Send voice</h2>
+          <div class="actions">
+            <button class="secondary" id="recordBtn">Record</button>
+            <button class="secondary" id="stopBtn" disabled>Stop</button>
+            <button class="primary" id="sendVoice" disabled>Send Voice</button>
+          </div>
+          <div class="status" id="voiceStatus"></div>
+          <audio id="audioPreview" controls hidden></audio>
+        </div>
+      </section>
+
+      <section class="card response" id="response"><div class="item"><small>Status</small><pre>Waiting for message...</pre></div></section>
+    </main>
+
+    <script>
+      const state = { taskId: null, recorder: null, chunks: [], audioBlob: null };
+      const $ = (id) => document.getElementById(id);
+      const el = {
+        backendUrl: $('backendUrl'), token: $('token'), tenantId: $('tenantId'), sender: $('sender'),
+        message: $('message'), sendText: $('sendText'), approveBtn: $('approveBtn'), rejectBtn: $('rejectBtn'),
+        textStatus: $('textStatus'), response: $('response'), backendLabel: $('backendLabel'),
+        recordBtn: $('recordBtn'), stopBtn: $('stopBtn'), sendVoice: $('sendVoice'), voiceStatus: $('voiceStatus'), audioPreview: $('audioPreview')
+      };
+
+      function esc(v) { return String(v).replace(/[&<>'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c])); }
+      function save() {
+        localStorage.setItem('munimLabBackendUrl', el.backendUrl.value.trim());
+        localStorage.setItem('munimLabTenantId', el.tenantId.value.trim());
+        localStorage.setItem('munimLabSender', el.sender.value.trim());
+        sessionStorage.setItem('munimLabToken', el.token.value.trim());
+        el.backendLabel.textContent = el.backendUrl.value.trim();
+      }
+      function load() {
+        el.backendUrl.value = localStorage.getItem('munimLabBackendUrl') || el.backendUrl.value;
+        el.tenantId.value = localStorage.getItem('munimLabTenantId') || el.tenantId.value;
+        el.sender.value = localStorage.getItem('munimLabSender') || el.sender.value;
+        el.token.value = sessionStorage.getItem('munimLabToken') || '';
+        el.backendLabel.textContent = el.backendUrl.value;
+      }
+      function cfg() {
+        save();
+        const token = el.token.value.trim();
+        if (!token) throw new Error('Test token is required');
+        return { backend: el.backendUrl.value.trim().replace(/\/+$/, ''), token, tenant: el.tenantId.value.trim(), sender: el.sender.value.trim() };
+      }
+      function setStatus(node, msg, cls='status') { node.className = cls; node.textContent = msg; }
+      function render(data) {
+        if (data.task_id) state.taskId = data.task_id;
+        el.approveBtn.disabled = !state.taskId;
+        el.rejectBtn.disabled = !state.taskId;
+        const parts = [];
+        const add = (k, v) => { if (v !== undefined && v !== null && v !== '') parts.push(`<div class="item"><small>${esc(k)}</small><pre>${esc(typeof v === 'string' ? v : JSON.stringify(v, null, 2))}</pre></div>`); };
+        add('Status', data.status || 'processed'); add('Transcript', data.transcript); add('Workflow', data.workflow || (data.intent && data.intent.workflow)); add('Task ID', data.task_id); add('State', data.state); add('Reply', data.reply); add('Confirmation card', data.confirmation_card); add('Resolved', data.resolved); add('Warnings', data.warnings);
+        parts.push(`<details><summary>Raw JSON</summary><pre>${esc(JSON.stringify(data, null, 2))}</pre></details>`);
+        el.response.innerHTML = parts.join('');
+      }
+      function renderError(err) { el.response.innerHTML = `<div class="item"><small>Error</small><pre>${esc(err.message || err)}</pre></div>`; }
+      async function postMessage(message, continueTask=null) {
+        const c = cfg();
+        const res = await fetch(`${c.backend}/test/message`, { method:'POST', headers:{'Content-Type':'application/json','X-Munim-Test-Token':c.token}, body: JSON.stringify({ tenant_id:c.tenant, sender:c.sender, message, continue_task:continueTask }) });
+        const data = await res.json().catch(() => ({message:'Invalid JSON response'}));
+        if (!res.ok) throw new Error(data.detail || data.message || `HTTP ${res.status}`);
+        return data;
+      }
+      el.sendText.addEventListener('click', async () => {
+        setStatus(el.textStatus, 'Sending...'); el.sendText.disabled = true;
+        try { render(await postMessage(el.message.value)); setStatus(el.textStatus, 'Processed', 'status ok'); }
+        catch (e) { renderError(e); setStatus(el.textStatus, e.message, 'status error'); }
+        finally { el.sendText.disabled = false; }
+      });
+      el.approveBtn.addEventListener('click', async () => {
+        if (!state.taskId) return;
+        try { setStatus(el.textStatus, 'Approving...'); render(await postMessage('approve', state.taskId)); setStatus(el.textStatus, 'Approval processed', 'status ok'); }
+        catch (e) { renderError(e); setStatus(el.textStatus, e.message, 'status error'); }
+      });
+      el.rejectBtn.addEventListener('click', async () => {
+        if (!state.taskId) return;
+        try { setStatus(el.textStatus, 'Rejecting...'); render(await postMessage('reject', state.taskId)); setStatus(el.textStatus, 'Rejection processed', 'status ok'); }
+        catch (e) { renderError(e); setStatus(el.textStatus, e.message, 'status error'); }
+      });
+      el.recordBtn.addEventListener('click', async () => {
+        if (!navigator.mediaDevices || !window.MediaRecorder) { setStatus(el.voiceStatus, 'MediaRecorder is not supported.', 'status error'); return; }
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia({audio:true});
+          state.chunks = []; state.recorder = new MediaRecorder(stream);
+          state.recorder.ondataavailable = e => { if (e.data.size) state.chunks.push(e.data); };
+          state.recorder.onstop = () => { stream.getTracks().forEach(t => t.stop()); state.audioBlob = new Blob(state.chunks,{type:'audio/webm'}); el.audioPreview.src = URL.createObjectURL(state.audioBlob); el.audioPreview.hidden = false; el.sendVoice.disabled = false; setStatus(el.voiceStatus, 'Recording ready.', 'status ok'); };
+          state.recorder.start(); el.recordBtn.disabled = true; el.stopBtn.disabled = false; el.sendVoice.disabled = true; setStatus(el.voiceStatus, 'Recording...');
+        } catch(e) { setStatus(el.voiceStatus, e.message, 'status error'); }
+      });
+      el.stopBtn.addEventListener('click', () => { if (state.recorder && state.recorder.state !== 'inactive') { state.recorder.stop(); el.recordBtn.disabled = false; el.stopBtn.disabled = true; } });
+      el.sendVoice.addEventListener('click', async () => {
+        try {
+          if (!state.audioBlob) throw new Error('Record audio first');
+          const c = cfg(); const form = new FormData(); form.append('tenant_id', c.tenant); form.append('sender', c.sender); form.append('audio_file', state.audioBlob, 'munim-lab.webm');
+          setStatus(el.voiceStatus, 'Sending voice...');
+          const res = await fetch(`${c.backend}/test/voice`, { method:'POST', headers:{'X-Munim-Test-Token':c.token}, body: form });
+          const data = await res.json().catch(() => ({message:'Invalid JSON response'}));
+          if (!res.ok) throw new Error(data.detail || data.message || `HTTP ${res.status}`);
+          render(data); setStatus(el.voiceStatus, 'Voice processed', 'status ok');
+        } catch(e) { renderError(e); setStatus(el.voiceStatus, e.message, 'status error'); }
+      });
+      ['backendUrl','token','tenantId','sender'].forEach(id => el[id].addEventListener('change', save));
+      load();
+    </script>
+  </body>
+</html>
