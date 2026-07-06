@@ -38,6 +38,11 @@
       .response { margin-top: 18px; display: grid; gap: 12px; }
       .item { border: 1px solid #d9e2ec; border-radius: 16px; padding: 14px; background: #fbfdff; }
       .item small { display: block; color: #667085; font-weight: 900; text-transform: uppercase; letter-spacing: .08em; margin-bottom: 8px; }
+      .document-actions { border: 1px solid #bbf7d0; border-radius: 18px; padding: 16px; background: #f0fdf4; }
+      .document-actions h3 { margin: 0 0 8px; color: #14532d; }
+      .document-actions p { margin: 0 0 12px; font-size: 14px; }
+      .document-actions .helper { color: #667085; font-size: 13px; }
+      .document-actions .actions { margin-top: 12px; }
       pre { margin: 0; white-space: pre-wrap; word-break: break-word; font-size: 13px; line-height: 1.5; }
       details { border: 1px dashed #d9e2ec; border-radius: 16px; padding: 12px; background: #fff; }
       audio { width: 100%; margin-top: 12px; }
@@ -126,15 +131,93 @@
         return { backend: el.backendUrl.value.trim().replace(/\/+$/, ''), token, tenant: el.tenantId.value.trim(), sender: el.sender.value.trim() };
       }
       function setStatus(node, msg, cls='status') { node.className = cls; node.textContent = msg; }
+      function pick(data, key) {
+        return data[key] || (data.result && data.result[key]);
+      }
+      function buildPdfUrl(pdfUrl, c) {
+        const configuredBackend = new URL(c.backend);
+        const sourceUrl = new URL(pdfUrl, c.backend);
+        const finalUrl = new URL(sourceUrl.pathname + sourceUrl.search, configuredBackend.origin);
+        if (!finalUrl.searchParams.has('tenant_id')) finalUrl.searchParams.set('tenant_id', c.tenant);
+        return finalUrl.toString();
+      }
+      async function readErrorMessage(response) {
+        const contentType = response.headers.get('content-type') || '';
+        try {
+          if (contentType.includes('application/json')) {
+            const data = await response.json();
+            return data.detail || data.message || JSON.stringify(data);
+          }
+          return await response.text();
+        } catch {
+          return `HTTP ${response.status}`;
+        }
+      }
+      async function openPdf(pdfUrl, mode) {
+        try {
+          const c = cfg();
+          const finalUrl = buildPdfUrl(pdfUrl, c);
+          setStatus(el.textStatus, mode === 'download' ? 'Downloading PDF...' : 'Opening PDF...');
+          const res = await fetch(finalUrl, { headers: { 'X-Munim-Test-Token': c.token } });
+          if (!res.ok) {
+            const message = await readErrorMessage(res);
+            throw new Error(`PDF generation failed: ${message}`);
+          }
+          const contentType = res.headers.get('content-type') || '';
+          const blob = await res.blob();
+          if (!contentType.includes('application/pdf') && !blob.type.includes('application/pdf')) {
+            const message = await blob.text().catch(() => 'Backend did not return a PDF.');
+            throw new Error(`PDF generation failed: ${message}`);
+          }
+          const blobUrl = URL.createObjectURL(blob);
+          const invoiceName = state.invoiceName || 'ai-munim-invoice';
+          if (mode === 'download') {
+            const link = document.createElement('a');
+            link.href = blobUrl;
+            link.download = `${invoiceName}.pdf`;
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            setTimeout(() => URL.revokeObjectURL(blobUrl), 30000);
+          } else {
+            window.open(blobUrl, '_blank', 'noopener,noreferrer');
+            setTimeout(() => URL.revokeObjectURL(blobUrl), 60000);
+          }
+          setStatus(el.textStatus, 'PDF ready', 'status ok');
+        } catch (err) {
+          setStatus(el.textStatus, err.message, 'status error');
+          renderError(err);
+        }
+      }
       function render(data) {
         if (data.task_id) state.taskId = data.task_id;
         el.approveBtn.disabled = !state.taskId;
         el.rejectBtn.disabled = !state.taskId;
+        const pdfUrl = pick(data, 'pdf_url');
+        const erpnextUrl = pick(data, 'erpnext_url');
+        const invoiceName = pick(data, 'erpnext_draft_invoice_name');
+        state.invoiceName = invoiceName || state.invoiceName;
         const parts = [];
         const add = (k, v) => { if (v !== undefined && v !== null && v !== '') parts.push(`<div class="item"><small>${esc(k)}</small><pre>${esc(typeof v === 'string' ? v : JSON.stringify(v, null, 2))}</pre></div>`); };
         add('Status', data.status || 'processed'); add('Transcript', data.transcript); add('Workflow', data.workflow || (data.intent && data.intent.workflow)); add('Task ID', data.task_id); add('State', data.state); add('Reply', data.reply); add('Confirmation card', data.confirmation_card); add('Resolved', data.resolved); add('Warnings', data.warnings);
+        if (pdfUrl) {
+          parts.push(`
+            <div class="document-actions">
+              <h3>Document Actions</h3>
+              ${invoiceName ? `<p><strong>Invoice:</strong> ${esc(invoiceName)}</p>` : ''}
+              <p class="helper">PDF requests are fetched with the configured test token.</p>
+              <div class="actions">
+                <button class="primary" type="button" data-pdf-action="open">Open PDF</button>
+                <button class="secondary" type="button" data-pdf-action="download">Download PDF</button>
+                ${erpnextUrl ? `<a class="secondary" style="display:inline-flex;border-radius:999px;padding:12px 18px;font-weight:900;text-decoration:none" target="_blank" rel="noopener noreferrer" href="${esc(erpnextUrl)}">Open in ERPNext</a>` : ''}
+              </div>
+            </div>
+          `);
+        }
         parts.push(`<details><summary>Raw JSON</summary><pre>${esc(JSON.stringify(data, null, 2))}</pre></details>`);
         el.response.innerHTML = parts.join('');
+        el.response.querySelector('[data-pdf-action="open"]')?.addEventListener('click', () => openPdf(pdfUrl, 'open'));
+        el.response.querySelector('[data-pdf-action="download"]')?.addEventListener('click', () => openPdf(pdfUrl, 'download'));
       }
       function renderError(err) { el.response.innerHTML = `<div class="item"><small>Error</small><pre>${esc(err.message || err)}</pre></div>`; }
       async function postMessage(message, continueTask=null) {
