@@ -144,7 +144,8 @@
         return {
           create_invoice: 'Sales Invoice',
           create_quotation: 'Quotation',
-          create_delivery_note: 'Delivery Note'
+          create_delivery_note: 'Delivery Note',
+          create_payment_entry: 'Payment Entry'
         }[workflow] || 'Document';
       }
       function getDocumentType(data) {
@@ -158,6 +159,7 @@
           || pick(data, 'erpnext_draft_invoice_name')
           || pick(data, 'erpnext_draft_quotation_name')
           || pick(data, 'erpnext_draft_delivery_note_name')
+          || pick(data, 'erpnext_draft_payment_entry_name')
           || '';
       }
       function setPendingTask(taskId) {
@@ -273,19 +275,20 @@
         const workflow = getWorkflow(data);
         const documentType = getDocumentType(data);
         const documentName = getDocumentName(data);
+        const hasDocumentActions = Boolean(pdfUrl || erpnextUrl || documentName);
         state.documentName = documentName || state.documentName;
         const parts = [];
         const add = (k, v) => { if (v !== undefined && v !== null && v !== '') parts.push(`<div class="item"><small>${esc(k)}</small><pre>${esc(typeof v === 'string' ? v : JSON.stringify(v, null, 2))}</pre></div>`); };
         add('Status', data.status || 'processed'); add('Transcript', pick(data, 'transcript')); add('Workflow', workflow); add('Task ID', pick(data, 'task_id')); add('State', pick(data, 'state')); add('Reply', pick(data, 'reply')); add('Confirmation card', pick(data, 'confirmation_card')); add('Resolved', pick(data, 'resolved')); add('Warnings', pick(data, 'warnings'));
-        if (pdfUrl) {
+        if (hasDocumentActions) {
           parts.push(`
             <div class="document-actions">
               <h3>Document Actions</h3>
               ${documentName ? `<p><strong>${esc(documentType)}:</strong> ${esc(documentName)}</p>` : `<p><strong>${esc(documentType)}</strong></p>`}
-              <p class="helper">PDF requests are fetched with the configured test token.</p>
+              ${pdfUrl ? '<p class="helper">PDF requests are fetched with the configured test token.</p>' : ''}
               <div class="actions">
-                <button class="primary" type="button" data-pdf-action="open">Open PDF</button>
-                <button class="secondary" type="button" data-pdf-action="download">Download PDF</button>
+                ${pdfUrl ? '<button class="primary" type="button" data-pdf-action="open">Open PDF</button>' : ''}
+                ${pdfUrl ? '<button class="secondary" type="button" data-pdf-action="download">Download PDF</button>' : ''}
                 ${erpnextUrl ? `<a class="secondary" style="display:inline-flex;border-radius:999px;padding:12px 18px;font-weight:900;text-decoration:none" target="_blank" rel="noopener noreferrer" href="${esc(erpnextUrl)}">Open in ERPNext</a>` : ''}
               </div>
             </div>
