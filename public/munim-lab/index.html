@@ -43,6 +43,8 @@
       .document-actions p { margin: 0 0 12px; font-size: 14px; }
       .document-actions .helper { color: #667085; font-size: 13px; }
       .document-actions .actions { margin-top: 12px; }
+      .voice-approval { display: none; }
+      .voice-approval.is-visible { display: inline-flex; }
       pre { margin: 0; white-space: pre-wrap; word-break: break-word; font-size: 13px; line-height: 1.5; }
       details { border: 1px dashed #d9e2ec; border-radius: 16px; padding: 12px; background: #fff; }
       audio { width: 100%; margin-top: 12px; }
@@ -90,6 +92,7 @@
             <button class="secondary" id="recordBtn">Record</button>
             <button class="secondary" id="stopBtn" disabled>Stop</button>
             <button class="primary" id="sendVoice" disabled>Send Voice</button>
+            <button class="secondary voice-approval" id="sendVoiceApproval" disabled>Send Voice as Approval</button>
           </div>
           <div class="status" id="voiceStatus"></div>
           <audio id="audioPreview" controls hidden></audio>
@@ -100,13 +103,13 @@
     </main>
 
     <script>
-      const state = { taskId: null, recorder: null, chunks: [], audioBlob: null };
+      const state = { taskId: null, recorder: null, chunks: [], audioBlob: null, audioUrl: null, audioMime: '', audioExtension: 'webm', documentName: '' };
       const $ = (id) => document.getElementById(id);
       const el = {
         backendUrl: $('backendUrl'), token: $('token'), tenantId: $('tenantId'), sender: $('sender'),
         message: $('message'), sendText: $('sendText'), approveBtn: $('approveBtn'), rejectBtn: $('rejectBtn'),
         textStatus: $('textStatus'), response: $('response'), backendLabel: $('backendLabel'),
-        recordBtn: $('recordBtn'), stopBtn: $('stopBtn'), sendVoice: $('sendVoice'), voiceStatus: $('voiceStatus'), audioPreview: $('audioPreview')
+        recordBtn: $('recordBtn'), stopBtn: $('stopBtn'), sendVoice: $('sendVoice'), sendVoiceApproval: $('sendVoiceApproval'), voiceStatus: $('voiceStatus'), audioPreview: $('audioPreview')
       };
 
       function esc(v) { return String(v).replace(/[&<>'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c])); }
@@ -134,6 +137,61 @@
       function pick(data, key) {
         return data[key] || (data.result && data.result[key]);
       }
+      function getWorkflow(data) {
+        return pick(data, 'workflow') || (data.intent && data.intent.workflow) || (data.result && data.result.intent && data.result.intent.workflow);
+      }
+      function getWorkflowDocumentType(workflow) {
+        return {
+          create_invoice: 'Sales Invoice',
+          create_quotation: 'Quotation',
+          create_delivery_note: 'Delivery Note'
+        }[workflow] || 'Document';
+      }
+      function getDocumentType(data) {
+        return (data.erpnext_writes && data.erpnext_writes.doctype)
+          || (data.result && data.result.erpnext_writes && data.result.erpnext_writes.doctype)
+          || getWorkflowDocumentType(getWorkflow(data));
+      }
+      function getDocumentName(data) {
+        return (data.erpnext_writes && data.erpnext_writes.name)
+          || (data.result && data.result.erpnext_writes && data.result.erpnext_writes.name)
+          || pick(data, 'erpnext_draft_invoice_name')
+          || pick(data, 'erpnext_draft_quotation_name')
+          || pick(data, 'erpnext_draft_delivery_note_name')
+          || '';
+      }
+      function setPendingTask(taskId) {
+        state.taskId = taskId || null;
+        el.approveBtn.disabled = !state.taskId;
+        el.rejectBtn.disabled = !state.taskId;
+        el.sendVoiceApproval.disabled = !state.taskId || !state.audioBlob;
+        el.sendVoiceApproval.classList.toggle('is-visible', Boolean(state.taskId));
+      }
+      function resetPendingTask() {
+        state.documentName = '';
+        setPendingTask(null);
+      }
+      function errorMessageFromData(data, fallback) {
+        const asText = (value) => {
+          if (!value) return '';
+          return typeof value === 'string' ? value : JSON.stringify(value);
+        };
+        if (!data) return fallback;
+        if (data.error === 'stt_unavailable' || String(data.message || '').includes('Voice service is not running')) {
+          return 'Voice service unavailable. Start STT/Whisper service or use text input.';
+        }
+        if (typeof data.detail === 'string') {
+          if (data.detail.includes('Voice service is not running')) return 'Voice service unavailable. Start STT/Whisper service or use text input.';
+          return data.detail;
+        }
+        if (data.detail && typeof data.detail === 'object') {
+          if (data.detail.error === 'stt_unavailable' || String(data.detail.message || '').includes('Voice service is not running')) {
+            return 'Voice service unavailable. Start STT/Whisper service or use text input.';
+          }
+          return data.detail.message || data.detail.error || JSON.stringify(data.detail);
+        }
+        return asText(data.message) || asText(data.error) || fallback;
+      }
       function buildPdfUrl(pdfUrl, c) {
         const configuredBackend = new URL(c.backend);
         const sourceUrl = new URL(pdfUrl, c.backend);
@@ -146,12 +204,31 @@
         try {
           if (contentType.includes('application/json')) {
             const data = await response.json();
-            return data.detail || data.message || JSON.stringify(data);
+            if (response.status === 503) return errorMessageFromData(data, `HTTP ${response.status}`);
+            return errorMessageFromData(data, JSON.stringify(data));
           }
           return await response.text();
         } catch {
           return `HTTP ${response.status}`;
         }
+      }
+      function chooseAudioMimeType() {
+        if (!window.MediaRecorder || !MediaRecorder.isTypeSupported) return '';
+        return ['audio/webm;codecs=opus', 'audio/webm', 'audio/ogg;codecs=opus', 'audio/mp4'].find(type => MediaRecorder.isTypeSupported(type)) || '';
+      }
+      function audioExtensionForMime(mime) {
+        if (mime.includes('ogg')) return 'ogg';
+        if (mime.includes('mp4')) return 'mp4';
+        return 'webm';
+      }
+      function revokeAudioPreview() {
+        if (state.audioUrl) URL.revokeObjectURL(state.audioUrl);
+        state.audioUrl = null;
+        el.audioPreview.removeAttribute('src');
+        el.audioPreview.hidden = true;
+      }
+      function safeFileName(name) {
+        return String(name || 'ai-munim-document').replace(/[^a-z0-9._-]+/gi, '-').replace(/^-+|-+$/g, '') || 'ai-munim-document';
       }
       async function openPdf(pdfUrl, mode) {
         try {
@@ -170,11 +247,11 @@
             throw new Error(`PDF generation failed: ${message}`);
           }
           const blobUrl = URL.createObjectURL(blob);
-          const invoiceName = state.invoiceName || 'ai-munim-invoice';
+          const documentName = safeFileName(state.documentName || 'ai-munim-document');
           if (mode === 'download') {
             const link = document.createElement('a');
             link.href = blobUrl;
-            link.download = `${invoiceName}.pdf`;
+            link.download = `${documentName}.pdf`;
             document.body.appendChild(link);
             link.click();
             link.remove();
@@ -190,21 +267,21 @@
         }
       }
       function render(data) {
-        if (data.task_id) state.taskId = data.task_id;
-        el.approveBtn.disabled = !state.taskId;
-        el.rejectBtn.disabled = !state.taskId;
+        setPendingTask(pick(data, 'task_id'));
         const pdfUrl = pick(data, 'pdf_url');
         const erpnextUrl = pick(data, 'erpnext_url');
-        const invoiceName = pick(data, 'erpnext_draft_invoice_name');
-        state.invoiceName = invoiceName || state.invoiceName;
+        const workflow = getWorkflow(data);
+        const documentType = getDocumentType(data);
+        const documentName = getDocumentName(data);
+        state.documentName = documentName || state.documentName;
         const parts = [];
         const add = (k, v) => { if (v !== undefined && v !== null && v !== '') parts.push(`<div class="item"><small>${esc(k)}</small><pre>${esc(typeof v === 'string' ? v : JSON.stringify(v, null, 2))}</pre></div>`); };
-        add('Status', data.status || 'processed'); add('Transcript', data.transcript); add('Workflow', data.workflow || (data.intent && data.intent.workflow)); add('Task ID', data.task_id); add('State', data.state); add('Reply', data.reply); add('Confirmation card', data.confirmation_card); add('Resolved', data.resolved); add('Warnings', data.warnings);
+        add('Status', data.status || 'processed'); add('Transcript', pick(data, 'transcript')); add('Workflow', workflow); add('Task ID', pick(data, 'task_id')); add('State', pick(data, 'state')); add('Reply', pick(data, 'reply')); add('Confirmation card', pick(data, 'confirmation_card')); add('Resolved', pick(data, 'resolved')); add('Warnings', pick(data, 'warnings'));
         if (pdfUrl) {
           parts.push(`
             <div class="document-actions">
               <h3>Document Actions</h3>
-              ${invoiceName ? `<p><strong>Invoice:</strong> ${esc(invoiceName)}</p>` : ''}
+              ${documentName ? `<p><strong>${esc(documentType)}:</strong> ${esc(documentName)}</p>` : `<p><strong>${esc(documentType)}</strong></p>`}
               <p class="helper">PDF requests are fetched with the configured test token.</p>
               <div class="actions">
                 <button class="primary" type="button" data-pdf-action="open">Open PDF</button>
@@ -224,11 +301,11 @@
         const c = cfg();
         const res = await fetch(`${c.backend}/test/message`, { method:'POST', headers:{'Content-Type':'application/json','X-Munim-Test-Token':c.token}, body: JSON.stringify({ tenant_id:c.tenant, sender:c.sender, message, continue_task:continueTask }) });
         const data = await res.json().catch(() => ({message:'Invalid JSON response'}));
-        if (!res.ok) throw new Error(data.detail || data.message || `HTTP ${res.status}`);
+        if (!res.ok) throw new Error(errorMessageFromData(data, `HTTP ${res.status}`));
         return data;
       }
       el.sendText.addEventListener('click', async () => {
-        setStatus(el.textStatus, 'Sending...'); el.sendText.disabled = true;
+        resetPendingTask(); setStatus(el.textStatus, 'Sending...'); el.sendText.disabled = true;
         try { render(await postMessage(el.message.value)); setStatus(el.textStatus, 'Processed', 'status ok'); }
         catch (e) { renderError(e); setStatus(el.textStatus, e.message, 'status error'); }
         finally { el.sendText.disabled = false; }
@@ -244,26 +321,58 @@
         catch (e) { renderError(e); setStatus(el.textStatus, e.message, 'status error'); }
       });
       el.recordBtn.addEventListener('click', async () => {
-        if (!navigator.mediaDevices || !window.MediaRecorder) { setStatus(el.voiceStatus, 'MediaRecorder is not supported.', 'status error'); return; }
+        if (!navigator.mediaDevices || !window.MediaRecorder) { setStatus(el.voiceStatus, 'Voice recording is not supported in this browser. Use text input.', 'status error'); return; }
+        let stream;
         try {
-          const stream = await navigator.mediaDevices.getUserMedia({audio:true});
-          state.chunks = []; state.recorder = new MediaRecorder(stream);
+          revokeAudioPreview();
+          state.audioBlob = null;
+          el.sendVoice.disabled = true;
+          el.sendVoiceApproval.disabled = true;
+          stream = await navigator.mediaDevices.getUserMedia({audio:true});
+          state.chunks = [];
+          state.audioMime = chooseAudioMimeType();
+          state.audioExtension = audioExtensionForMime(state.audioMime);
+          state.recorder = state.audioMime ? new MediaRecorder(stream, { mimeType: state.audioMime }) : new MediaRecorder(stream);
           state.recorder.ondataavailable = e => { if (e.data.size) state.chunks.push(e.data); };
-          state.recorder.onstop = () => { stream.getTracks().forEach(t => t.stop()); state.audioBlob = new Blob(state.chunks,{type:'audio/webm'}); el.audioPreview.src = URL.createObjectURL(state.audioBlob); el.audioPreview.hidden = false; el.sendVoice.disabled = false; setStatus(el.voiceStatus, 'Recording ready.', 'status ok'); };
+          state.recorder.onstop = () => {
+            stream.getTracks().forEach(t => t.stop());
+            state.audioBlob = new Blob(state.chunks, { type: state.audioMime || 'audio/webm' });
+            state.audioUrl = URL.createObjectURL(state.audioBlob);
+            el.audioPreview.src = state.audioUrl;
+            el.audioPreview.hidden = false;
+            el.sendVoice.disabled = false;
+            el.sendVoiceApproval.disabled = !state.taskId;
+            setStatus(el.voiceStatus, 'Recording ready. You can review or send.', 'status ok');
+          };
           state.recorder.start(); el.recordBtn.disabled = true; el.stopBtn.disabled = false; el.sendVoice.disabled = true; setStatus(el.voiceStatus, 'Recording...');
-        } catch(e) { setStatus(el.voiceStatus, e.message, 'status error'); }
+        } catch(e) {
+          if (stream) stream.getTracks().forEach(t => t.stop());
+          el.recordBtn.disabled = false;
+          el.stopBtn.disabled = true;
+          setStatus(el.voiceStatus, e.message, 'status error');
+        }
       });
       el.stopBtn.addEventListener('click', () => { if (state.recorder && state.recorder.state !== 'inactive') { state.recorder.stop(); el.recordBtn.disabled = false; el.stopBtn.disabled = true; } });
-      el.sendVoice.addEventListener('click', async () => {
+      async function sendVoice(continueTask=null) {
         try {
           if (!state.audioBlob) throw new Error('Record audio first');
-          const c = cfg(); const form = new FormData(); form.append('tenant_id', c.tenant); form.append('sender', c.sender); form.append('audio_file', state.audioBlob, 'munim-lab.webm');
+          const c = cfg(); const form = new FormData(); form.append('tenant_id', c.tenant); form.append('sender', c.sender);
+          if (continueTask) form.append('continue_task', continueTask);
+          form.append('audio_file', state.audioBlob, `munim-lab.${state.audioExtension}`);
           setStatus(el.voiceStatus, 'Sending voice...');
           const res = await fetch(`${c.backend}/test/voice`, { method:'POST', headers:{'X-Munim-Test-Token':c.token}, body: form });
           const data = await res.json().catch(() => ({message:'Invalid JSON response'}));
-          if (!res.ok) throw new Error(data.detail || data.message || `HTTP ${res.status}`);
+          if (!res.ok) throw new Error(errorMessageFromData(data, `HTTP ${res.status}`));
           render(data); setStatus(el.voiceStatus, 'Voice processed', 'status ok');
         } catch(e) { renderError(e); setStatus(el.voiceStatus, e.message, 'status error'); }
+      }
+      el.sendVoice.addEventListener('click', async () => {
+        resetPendingTask();
+        await sendVoice();
+      });
+      el.sendVoiceApproval.addEventListener('click', async () => {
+        if (!state.taskId) return;
+        await sendVoice(state.taskId);
       });
       ['backendUrl','token','tenantId','sender'].forEach(id => el[id].addEventListener('change', save));
       load();
